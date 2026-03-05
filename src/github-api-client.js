@@ -8,8 +8,8 @@ import { getInput } from '@actions/core'
 
 const defaultApiParams = { owner: context.repo.owner, repo: context.repo.repo }
 const jiraTicketRegex = new RegExp(
-  `^(${getInput('project_key')}-\\d+):?\\s?.+`,
-  'i'
+  `${getInput('ticket_id_pattern')}`,
+  `${getInput('ticket_id_pattern_flags')}`
 )
 
 const token = process.env.GITHUB_TOKEN
@@ -23,7 +23,10 @@ async function getJiraTicketsFromCommits() {
   })
   const [latestTag, previousTag] = tags
 
-  const [latestCommit, previousCommit] = await Promise.all([
+  let [latestCommit, previousCommit] = undefined;
+
+  if (previousTag) {
+  [latestCommit, previousCommit] = await Promise.all([
     github.rest.repos.getCommit({
       ...defaultApiParams,
       ref: latestTag.commit.sha,
@@ -33,11 +36,22 @@ async function getJiraTicketsFromCommits() {
       ref: previousTag.commit.sha,
     }),
   ])
+} else {
+  latestCommit = await github.rest.repos.getCommit({
+    ...defaultApiParams,
+    ref: latestTag.commit.sha,
+  })
+}
 
-  // We are shifting the last commit's date one second, so to not include the commit from the previous tag
-  const since = new Date(
-    new Date(previousCommit.data.commit.committer.date).valueOf() + 1000
-  ).toISOString()
+  // If there is a previous release commit we are shifting the last commit's date one second, 
+  // so to not include the commit from the previous tag. Otherwise default to the earliest date possible 
+  // to include all commits in the repo.
+  let since = new Date(('0001-01-01T00:00:00Z')).toISOString();
+  if (previousCommit) {
+     since = new Date(
+      new Date(previousCommit.data.commit.committer.date).valueOf() + 1000
+    ).toISOString()
+  }
 
   const commits = await github.rest.repos.listCommits({
     ...defaultApiParams,

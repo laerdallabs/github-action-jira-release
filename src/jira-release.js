@@ -8,7 +8,7 @@ async function run() {
   try {
     const { tag_name, name, body } = context.payload.release
 
-    let jiraVersionName = `${context.repo.repo}-${tag_name.replace(/^v/, '')}`
+    let jiraVersionName = `${getInput('release_name_prefix')}${tag_name.replace(/^v/, '')}`
 
     const data = await jiraClient
       .post('rest/api/3/version', {
