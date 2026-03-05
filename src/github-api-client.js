@@ -62,12 +62,17 @@ async function getJiraTicketsFromCommits() {
   const jiraTickets = commits.data
     .map((c) => {
       const regexMatches = jiraTicketRegex.exec(c.commit.message) || []
-
+      log.info(`Commit message: ${c.commit.message}`)
+      if (regexMatches.length > 0) {
+        log.info(`Found Jira ticket in commit message: ${regexMatches[1]}`)
+      }
       return regexMatches[1]
     })
     .filter((el) => el)
 
-  return Array.from(new Set(jiraTickets)) // use Set to eliminate duplicate entries
+  const uniqueJiraTickets = Array.from(new Set(jiraTickets)) // use Set to eliminate duplicate entries
+  core.info(`Found ${uniqueJiraTickets.length} unique Jira tickets in commit messages:\r\n${uniqueJiraTickets.join('\r\n')}`);
+  return uniqueJiraTickets
 }
 
 export default getJiraTicketsFromCommits

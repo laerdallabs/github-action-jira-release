@@ -28892,7 +28892,7 @@ function requireGithub () {
 
 var githubExports = requireGithub();
 
-var core = {};
+var core$1 = {};
 
 var command = {};
 
@@ -31142,10 +31142,10 @@ function requirePlatform () {
 var hasRequiredCore;
 
 function requireCore () {
-	if (hasRequiredCore) return core;
+	if (hasRequiredCore) return core$1;
 	hasRequiredCore = 1;
 	(function (exports$1) {
-		var __createBinding = (core && core.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+		var __createBinding = (core$1 && core$1.__createBinding) || (Object.create ? (function(o, m, k, k2) {
 		    if (k2 === undefined) k2 = k;
 		    var desc = Object.getOwnPropertyDescriptor(m, k);
 		    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
@@ -31156,12 +31156,12 @@ function requireCore () {
 		    if (k2 === undefined) k2 = k;
 		    o[k2] = m[k];
 		}));
-		var __setModuleDefault = (core && core.__setModuleDefault) || (Object.create ? (function(o, v) {
+		var __setModuleDefault = (core$1 && core$1.__setModuleDefault) || (Object.create ? (function(o, v) {
 		    Object.defineProperty(o, "default", { enumerable: true, value: v });
 		}) : function(o, v) {
 		    o["default"] = v;
 		});
-		var __importStar = (core && core.__importStar) || (function () {
+		var __importStar = (core$1 && core$1.__importStar) || (function () {
 		    var ownKeys = function(o) {
 		        ownKeys = Object.getOwnPropertyNames || function (o) {
 		            var ar = [];
@@ -31178,7 +31178,7 @@ function requireCore () {
 		        return result;
 		    };
 		})();
-		var __awaiter = (core && core.__awaiter) || function (thisArg, _arguments, P, generator) {
+		var __awaiter = (core$1 && core$1.__awaiter) || function (thisArg, _arguments, P, generator) {
 		    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
 		    return new (P || (P = Promise))(function (resolve, reject) {
 		        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
@@ -31523,8 +31523,8 @@ function requireCore () {
 		 */
 		exports$1.platform = __importStar(requirePlatform());
 		
-	} (core));
-	return core;
+	} (core$1));
+	return core$1;
 }
 
 var coreExports = requireCore();
@@ -31591,12 +31591,17 @@ async function getJiraTicketsFromCommits() {
   const jiraTickets = commits.data
     .map((c) => {
       const regexMatches = jiraTicketRegex.exec(c.commit.message) || [];
-
+      log.info(`Commit message: ${c.commit.message}`);
+      if (regexMatches.length > 0) {
+        log.info(`Found Jira ticket in commit message: ${regexMatches[1]}`);
+      }
       return regexMatches[1]
     })
     .filter((el) => el);
 
-  return Array.from(new Set(jiraTickets)) // use Set to eliminate duplicate entries
+  const uniqueJiraTickets = Array.from(new Set(jiraTickets)); // use Set to eliminate duplicate entries
+  core.info(`Found ${uniqueJiraTickets.length} unique Jira tickets in commit messages:\r\n${uniqueJiraTickets.join('\r\n')}`);
+  return uniqueJiraTickets
 }
 
 const typedArrayTypeNames = [
