@@ -31552,7 +31552,7 @@ async function getJiraTicketsFromCommits() {
   });
   const [latestTag, previousTag] = tags;
 
-  let [latestCommit, previousCommit] = undefined;
+  let [latestCommit, previousCommit] = [undefined, undefined];
 
   if (previousTag) {
 [latestCommit, previousCommit] = await Promise.all([
