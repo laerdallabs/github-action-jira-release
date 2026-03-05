@@ -59,6 +59,7 @@ async function getJiraTicketsFromCommits() {
     until: latestCommit.data.commit.committer.date,
   })
 
+  info(`Regex pattern for Jira ticket extraction: ${jiraTicketRegex}`)
   const jiraTickets = commits.data
     .map((c) => {
       const regexMatches = c.commit.message.matchAll(jiraTicketRegex) || []
