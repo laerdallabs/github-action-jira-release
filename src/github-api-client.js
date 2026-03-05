@@ -65,9 +65,9 @@ async function getJiraTicketsFromCommits() {
       for (const match of regexMatches) {
         info(`Found Jira ticket in commit message: ${match[1]}`)
       }
-      return match[1]
+      return Array.from(regexMatches, (m) => m[1])
     })
-    .filter((el) => el)
+    .flat()
 
   const uniqueJiraTickets = Array.from(new Set(jiraTickets)) // use Set to eliminate duplicate entries
   info(
