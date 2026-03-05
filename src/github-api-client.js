@@ -4,7 +4,7 @@
  */
 
 import { context, getOctokit } from '@actions/github'
-import { getInput } from '@actions/core'
+import { getInput, info } from '@actions/core'
 
 const defaultApiParams = { owner: context.repo.owner, repo: context.repo.repo }
 const jiraTicketRegex = new RegExp(
@@ -62,16 +62,16 @@ async function getJiraTicketsFromCommits() {
   const jiraTickets = commits.data
     .map((c) => {
       const regexMatches = jiraTicketRegex.exec(c.commit.message) || []
-      core.info(`Commit message: ${c.commit.message}`)
+      info(`Commit message: ${c.commit.message}`)
       if (regexMatches.length > 0) {
-        core.info(`Found Jira ticket in commit message: ${regexMatches[1]}`)
+        info(`Found Jira ticket in commit message: ${regexMatches[1]}`)
       }
       return regexMatches[1]
     })
     .filter((el) => el)
 
   const uniqueJiraTickets = Array.from(new Set(jiraTickets)) // use Set to eliminate duplicate entries
-  core.info(`Found ${uniqueJiraTickets.length} unique Jira tickets in commit messages:\r\n${uniqueJiraTickets.join('\r\n')}`);
+  info(`Found ${uniqueJiraTickets.length} unique Jira tickets in commit messages:\r\n${uniqueJiraTickets.join('\r\n')}`);
   return uniqueJiraTickets
 }
 
