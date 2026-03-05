@@ -23,32 +23,32 @@ async function getJiraTicketsFromCommits() {
   })
   const [latestTag, previousTag] = tags
 
-  let [latestCommit, previousCommit] = undefined;
+  let [latestCommit, previousCommit] = undefined
 
   if (previousTag) {
-  [latestCommit, previousCommit] = await Promise.all([
-    github.rest.repos.getCommit({
+    ;[latestCommit, previousCommit] = await Promise.all([
+      github.rest.repos.getCommit({
+        ...defaultApiParams,
+        ref: latestTag.commit.sha,
+      }),
+      github.rest.repos.getCommit({
+        ...defaultApiParams,
+        ref: previousTag.commit.sha,
+      }),
+    ])
+  } else {
+    latestCommit = await github.rest.repos.getCommit({
       ...defaultApiParams,
       ref: latestTag.commit.sha,
-    }),
-    github.rest.repos.getCommit({
-      ...defaultApiParams,
-      ref: previousTag.commit.sha,
-    }),
-  ])
-} else {
-  latestCommit = await github.rest.repos.getCommit({
-    ...defaultApiParams,
-    ref: latestTag.commit.sha,
-  })
-}
+    })
+  }
 
-  // If there is a previous release commit we are shifting the last commit's date one second, 
-  // so to not include the commit from the previous tag. Otherwise default to the earliest date possible 
+  // If there is a previous release commit we are shifting the last commit's date one second,
+  // so to not include the commit from the previous tag. Otherwise default to the earliest date possible
   // to include all commits in the repo.
-  let since = new Date(('0001-01-01T00:00:00Z')).toISOString();
+  let since = new Date('0001-01-01T00:00:00Z').toISOString()
   if (previousCommit) {
-     since = new Date(
+    since = new Date(
       new Date(previousCommit.data.commit.committer.date).valueOf() + 1000
     ).toISOString()
   }
