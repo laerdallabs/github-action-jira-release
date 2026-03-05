@@ -13,7 +13,7 @@ inputs:
   ticket_id_pattern:
     description: 'Regex pattern to pick ticket ids from the commit messages. Use {project_key} as a placeholder for the project key. Example: "{project_key}-\\d+"'
     required: false
-    default: '^.*({project_key}-\d+).*'
+    default: '.*({project_key}-\\d+).*'
   ticket_id_pattern_flags:
     description: 'Regex pattern flags. Example: "g"'
     required: false

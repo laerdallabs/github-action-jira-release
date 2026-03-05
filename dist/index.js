@@ -31590,17 +31590,18 @@ async function getJiraTicketsFromCommits() {
 
   const jiraTickets = commits.data
     .map((c) => {
-      const regexMatches = jiraTicketRegex.exec(c.commit.message) || [];
-      coreExports.info(`Commit message: ${c.commit.message}`);
-      if (regexMatches.length > 0) {
-        coreExports.info(`Found Jira ticket in commit message: ${regexMatches[1]}`);
+      const regexMatches = c.commit.message.matchAll(jiraTicketRegex) || [];
+      for (const match of regexMatches) {
+        coreExports.info(`Found Jira ticket in commit message: ${match[1]}`);
       }
-      return regexMatches[1]
+      return match[1]
     })
     .filter((el) => el);
 
   const uniqueJiraTickets = Array.from(new Set(jiraTickets)); // use Set to eliminate duplicate entries
-  coreExports.info(`Found ${uniqueJiraTickets.length} unique Jira tickets in commit messages:\r\n${uniqueJiraTickets.join('\r\n')}`);
+  coreExports.info(
+    `Found ${uniqueJiraTickets.length} unique Jira tickets in commit messages:\r\n${uniqueJiraTickets.join('\r\n')}`
+  );
   return uniqueJiraTickets
 }
 
