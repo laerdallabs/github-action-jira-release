@@ -62,9 +62,9 @@ async function getJiraTicketsFromCommits() {
   const jiraTickets = commits.data
     .map((c) => {
       const regexMatches = jiraTicketRegex.exec(c.commit.message) || []
-      log.info(`Commit message: ${c.commit.message}`)
+      core.info(`Commit message: ${c.commit.message}`)
       if (regexMatches.length > 0) {
-        log.info(`Found Jira ticket in commit message: ${regexMatches[1]}`)
+        core.info(`Found Jira ticket in commit message: ${regexMatches[1]}`)
       }
       return regexMatches[1]
     })
