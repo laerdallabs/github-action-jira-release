@@ -31595,7 +31595,6 @@ async function getJiraTicketsFromCommits() {
       return Array.from(regexMatches, (m) => m[1])
     })
     .flat();
-  coreExports.info(`jiraTicket map: ${jiraTickets}`);
   const uniqueJiraTickets = Array.from(new Set(jiraTickets)); // use Set to eliminate duplicate entries
   coreExports.info(
     `Found ${uniqueJiraTickets.length} unique Jira tickets in commit messages:\r\n${uniqueJiraTickets.join('\r\n')}`
