@@ -1,5 +1,5 @@
 import { context } from '@actions/github'
-import { getInput, setFailed, setOutput} from '@actions/core'
+import { getInput, setFailed, setOutput } from '@actions/core'
 
 import setFixVersion from './jira-issues-updater'
 import jiraClient from './jira-client'
@@ -8,7 +8,7 @@ async function run() {
   try {
     const { tag_name, name, body } = context.payload.release
 
-    let jiraVersionName = `${context.repo.repo}-${tag_name.replace(/^v/, '')}`
+    let jiraVersionName = `${getInput('release_name_prefix')}${tag_name.replace(/^v/, '')}`
 
     const data = await jiraClient
       .post('rest/api/3/version', {

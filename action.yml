@@ -7,9 +7,17 @@ inputs:
   project_id:
     description: 'Id of the Jira project (int64)'
     required: true
-  project_key:
-    description: 'Project key. Used to pick ticket ids from the commit messages'
+  ticket_id_pattern:
+    description: 'Regex pattern to pick ticket ids from the commit messages. Example: ".*(SDST-\d+).*"'
     required: true
+  ticket_id_pattern_flags:
+    description: 'Regex pattern flags. Example: "g"'
+    required: false
+    default: 'gi'
+  release_name_prefix:
+    description: 'Release name prefix. Example: "Release "'
+    required: false
+    default: ''
 outputs:
   jira_release_id:
     description: 'Jira Release ID'

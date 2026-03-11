@@ -31537,8 +31537,8 @@ var coreExports = requireCore();
 
 const defaultApiParams = { owner: githubExports.context.repo.owner, repo: githubExports.context.repo.repo };
 const jiraTicketRegex = new RegExp(
-  `^(${coreExports.getInput('project_key')}-\\d+):?\\s?.+`,
-  'i'
+  `${coreExports.getInput('ticket_id_pattern')}`,
+  `${coreExports.getInput('ticket_id_pattern_flags')}`
 );
 
 const token = process.env.GITHUB_TOKEN;
@@ -31552,21 +31552,35 @@ async function getJiraTicketsFromCommits() {
   });
   const [latestTag, previousTag] = tags;
 
-  const [latestCommit, previousCommit] = await Promise.all([
-    github.rest.repos.getCommit({
+  let [latestCommit, previousCommit] = [undefined, undefined];
+
+  if (previousTag) {
+[latestCommit, previousCommit] = await Promise.all([
+      github.rest.repos.getCommit({
+        ...defaultApiParams,
+        ref: latestTag.commit.sha,
+      }),
+      github.rest.repos.getCommit({
+        ...defaultApiParams,
+        ref: previousTag.commit.sha,
+      }),
+    ]);
+  } else {
+    latestCommit = await github.rest.repos.getCommit({
       ...defaultApiParams,
       ref: latestTag.commit.sha,
-    }),
-    github.rest.repos.getCommit({
-      ...defaultApiParams,
-      ref: previousTag.commit.sha,
-    }),
-  ]);
+    });
+  }
 
-  // We are shifting the last commit's date one second, so to not include the commit from the previous tag
-  const since = new Date(
-    new Date(previousCommit.data.commit.committer.date).valueOf() + 1000
-  ).toISOString();
+  // If there is a previous release commit we are shifting the last commit's date one second,
+  // so to not include the commit from the previous tag. Otherwise default to the earliest date possible
+  // to include all commits in the repo.
+  let since = new Date('0001-01-01T00:00:00Z').toISOString();
+  if (previousCommit) {
+    since = new Date(
+      new Date(previousCommit.data.commit.committer.date).valueOf() + 1000
+    ).toISOString();
+  }
 
   const commits = await github.rest.repos.listCommits({
     ...defaultApiParams,
@@ -31574,15 +31588,18 @@ async function getJiraTicketsFromCommits() {
     until: latestCommit.data.commit.committer.date,
   });
 
+  coreExports.info(`Regex pattern for Jira ticket extraction: ${jiraTicketRegex}`);
   const jiraTickets = commits.data
     .map((c) => {
-      const regexMatches = jiraTicketRegex.exec(c.commit.message) || [];
-
-      return regexMatches[1]
+      const regexMatches = c.commit.message.matchAll(jiraTicketRegex) || [];
+      return Array.from(regexMatches, (m) => m[1])
     })
-    .filter((el) => el);
-
-  return Array.from(new Set(jiraTickets)) // use Set to eliminate duplicate entries
+    .flat();
+  const uniqueJiraTickets = Array.from(new Set(jiraTickets)); // use Set to eliminate duplicate entries
+  coreExports.info(
+    `Found ${uniqueJiraTickets.length} unique Jira tickets in commit messages:\r\n${uniqueJiraTickets.join('\r\n')}`
+  );
+  return uniqueJiraTickets
 }
 
 const typedArrayTypeNames = [
@@ -44004,7 +44021,7 @@ async function run() {
   try {
     const { tag_name, name, body } = githubExports.context.payload.release;
 
-    let jiraVersionName = `${githubExports.context.repo.repo}-${tag_name.replace(/^v/, '')}`;
+    let jiraVersionName = `${coreExports.getInput('release_name_prefix')}${tag_name.replace(/^v/, '')}`;
 
     const data = await jiraClient
       .post('rest/api/3/version', {

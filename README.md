@@ -68,14 +68,16 @@ The example above expects a list of certain secrets available in the repository:
 
 - `ATLASSIAN_CLOUD_USER`
 - `ATLASSIAN_CLOUD_APIKEY`
-- `ATLASSIAN_CLOUD_DOMAIN`
+- `ATLASSIAN_CLOUD_DOMAIN` (this is the moniker and full host name for your Atlassian domain - e.g. https://acme.atlassian.net)
 
 ### Action inputs
 
-The action requires 2 input parameters provided:
+The action requires 2 input parameters and has 2 optional input parameters:
 
-- `project_id` , used in the API calls
-- `project_key`, used in the regular expression to extract Jira ticket number from the commit summary message
+- `project_id`, used in the API calls. Obtainable via GET request to Jira (for example: `https://acme.atlassian.net/rest/api/3/project/<project key>`)
+- `ticket_id_pattern`, the regex pattern for identifying Jira issues that are part of the release. For example `.*(DEVOPS-\d+).*` - which will find all commits with a message containing a string matching `DEVOPS-<number>` where the number is the Jira ticket number.
+- `ticket_id_pattern_flags (optional)`, the regex flags used when doing commit message pattern matching. The default is `gi` which does a global case insensitive match (will find all instances of the ticket/issue pattern and does not require a case match on the project key). The `g` option is required for the pattern to match all possible incidences of tickets. Removing the `g` will result in the pattern only matching the first found.
+- `release_name_prefix (optional)`, a string prefix to apply to release names in Jira. Defaults to an empty string. By default Jira release names are the semantic version of the GitHub release with any `v` stripped out (e.g. `1.1.1`). You may use this prefix to help identify releases if the Jira project space is used for managing multiple smaller projects. If you set this, you should add whatever delimiter/separator between your prefix and the semantic version if you desire one (such as `-` or a space), the name generation will not add one for you
 
 The action requires 4 environment variables:
 
@@ -87,4 +89,4 @@ The action requires 4 environment variables:
 ## Permissions
 
 **NOTE**
-The API user used to communicate with Jira needs to have the "Admin" rights for a project where Releases are to be created.
+The API user used to communicate with Jira needs to have the "Admin" rights for a project where Releases are to be created. This is a JIRA requirement, release versions in JIRA require admin level permissions to create and manage.
