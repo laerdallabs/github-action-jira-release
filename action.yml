@@ -7,9 +7,6 @@ inputs:
   project_id:
     description: 'Id of the Jira project (int64)'
     required: true
-  project_key:
-    description: 'Project key. Used to pick ticket ids from the commit messages'
-    required: true
   ticket_id_pattern:
     description: 'Regex pattern to pick ticket ids from the commit messages. Example: ".*(SDST-\d+).*"'
     required: true
